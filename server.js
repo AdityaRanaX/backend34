@@ -10,6 +10,12 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Request logging middleware
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+  next();
+});
+
 // Connect to database
 connectDB();
 
@@ -38,12 +44,21 @@ app.use(errorHandler);
 
 // Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
+const server = app.listen(PORT, () => {
+  console.log(`\n🚀 Server is running on port ${PORT}`);
   console.log(`📝 API Documentation:`);
   console.log(`   POST   /api/users/register - Register a new user`);
   console.log(`   GET    /api/users - Get all users`);
   console.log(`   GET    /api/users/:id - Get user by ID`);
   console.log(`   PUT    /api/users/:id - Update user`);
-  console.log(`   DELETE /api/users/:id - Delete user`);
+  console.log(`   DELETE /api/users/:id - Delete user\n`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM signal received: closing HTTP server');
+  server.close(() => {
+    console.log('HTTP server closed');
+    process.exit(0);
+  });
 });

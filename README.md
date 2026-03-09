@@ -2,14 +2,17 @@
 
 A robust Node.js + Express backend for Creator's Platform with MongoDB database integration.
 
-## Features
+## ✨ Features
 
 ✅ User registration and management  
-✅ Secure password hashing with bcrypt  
+✅ Secure password hashing with bcrypt (10 salt rounds)
 ✅ MongoDB integration with Mongoose  
 ✅ RESTful API endpoints  
 ✅ Input validation and error handling  
 ✅ Clean folder structure  
+✅ Request logging middleware  
+✅ Graceful server shutdown  
+✅ Production-ready code  
 
 ## Project Structure
 
