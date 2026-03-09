@@ -1,5 +1,11 @@
 const User = require('../models/User');
 
+// Helper function for validation
+const validateEmail = (email) => {
+  const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  return re.test(email);
+};
+
 // @desc    Register a user
 // @route   POST /api/users/register
 // @access  Public
@@ -9,15 +15,26 @@ exports.registerUser = async (req, res) => {
 
     // Validate input
     if (!name || !email || !password) {
+      console.log('❌ Validation failed: Missing required fields');
       return res.status(400).json({
         success: false,
         message: 'Please provide name, email, and password',
       });
     }
 
+    // Validate email format
+    if (!validateEmail(email)) {
+      console.log('❌ Validation failed: Invalid email format');
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid email address',
+      });
+    }
+
     // Check if user already exists
     let user = await User.findOne({ email });
     if (user) {
+      console.log(`❌ User already exists: ${email}`);
       return res.status(400).json({
         success: false,
         message: 'Email already registered',
@@ -31,6 +48,8 @@ exports.registerUser = async (req, res) => {
       password,
     });
 
+    console.log(`✅ User registered successfully: ${email}`);
+
     // Return user without password
     const userResponse = user.toObject();
     delete userResponse.password;
@@ -41,6 +60,7 @@ exports.registerUser = async (req, res) => {
       data: userResponse,
     });
   } catch (error) {
+    console.error(`❌ Registration error: ${error.message}`);
     res.status(500).json({
       success: false,
       message: error.message || 'Error registering user',
@@ -54,6 +74,7 @@ exports.registerUser = async (req, res) => {
 exports.getAllUsers = async (req, res) => {
   try {
     const users = await User.find().select('-password');
+    console.log(`📋 Retrieved ${users.length} users`);
 
     res.status(200).json({
       success: true,
@@ -61,6 +82,7 @@ exports.getAllUsers = async (req, res) => {
       data: users,
     });
   } catch (error) {
+    console.error(`❌ Error fetching users: ${error.message}`);
     res.status(500).json({
       success: false,
       message: error.message || 'Error fetching users',
